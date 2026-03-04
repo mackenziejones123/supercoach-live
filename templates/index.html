@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SuperCoach Live</title>
+<style>
+body { background:#111; color:#eee; font-family:Arial; padding:20px; }
+.container { display:flex; gap:40px; }
+.team { width:50%; }
+.position { margin-top:15px; background:#222; padding:5px; font-weight:bold; }
+.player { margin-top:8px; padding:6px; background:#1a1a1a; border-radius:6px; }
+.score { float:right; font-weight:bold; }
+.delta { font-size:12px; margin-left:6px; color:#00ff88; }
+</style>
+</head>
+<body>
+
+<h1>Round {{ round }} - Live</h1>
+<div id="matches"></div>
+
+<script>
+let previousScores = {};
+
+async function fetchData() {
+    const res = await fetch("/data");
+    const data = await res.json();
+    render(data);
+}
+
+function render(data) {
+    const container = document.getElementById("matches");
+    container.innerHTML = "";
+
+    for (const matchKey in data.matches) {
+        const match = data.matches[matchKey];
+        const teams = Object.keys(match);
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "container";
+
+        teams.forEach(teamId => {
+            const teamDiv = document.createElement("div");
+            teamDiv.className = "team";
+
+            const title = document.createElement("h2");
+            title.innerText = data.teams[teamId];
+            teamDiv.appendChild(title);
+
+            match[teamId].forEach(player => {
+                const playerDiv = document.createElement("div");
+                playerDiv.className = "player";
+
+                const name = document.createElement("strong");
+                name.innerText = player.name;
+                playerDiv.appendChild(name);
+
+                const score = document.createElement("span");
+                score.className = "score";
+                score.innerText = player.score;
+
+                const key = teamId + "_" + player.name;
+
+                if (previousScores[key] !== undefined) {
+                    const diff = player.score - previousScores[key];
+                    if (diff > 0) {
+                        const delta = document.createElement("span");
+                        delta.className = "delta";
+                        delta.innerText = "+" + diff;
+                        score.appendChild(delta);
+                    }
+                }
+
+                previousScores[key] = player.score;
+
+                playerDiv.appendChild(score);
+                teamDiv.appendChild(playerDiv);
+            });
+
+            wrapper.appendChild(teamDiv);
+        });
+
+        container.appendChild(wrapper);
+    }
+}
+
+setInterval(fetchData, 10000);
+fetchData();
+</script>
+
+</body>
+</html>
