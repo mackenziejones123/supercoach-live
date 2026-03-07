@@ -30,10 +30,16 @@ TEAM_COLOURS = {
 def safe(value):
     return value if value is not None else 0
 
+
 def get_matches():
     headers = {"User-Agent": "Mozilla/5.0"}
-    response = requests.get(API_URL, headers=headers)
-    data = response.json()
+
+    try:
+        response = requests.get(API_URL, headers=headers, timeout=8)
+        data = response.json()
+    except Exception as e:
+        print("API error:", e)
+        return {}, {}
 
     matches = {}
     team_names = {}
@@ -113,7 +119,6 @@ def data():
 
         for team_id, players in teams.items():
             output[key_str][str(team_id)] = {
-                "total": sum(p["score"] for p in players),
                 "players": {
                     p["name"]: {
                         "score": p["score"],
@@ -185,7 +190,6 @@ body {{
 .team-name {{
     font-size:22px;
     font-weight:700;
-
 }}
 
 .player {{
@@ -405,4 +409,4 @@ pollData();
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
