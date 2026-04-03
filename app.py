@@ -4,7 +4,7 @@ from collections import defaultdict
 
 app = Flask(__name__)
 
-ROUND = 3
+ROUND = 5
 API_URL = f"https://www.supercoach.com.au/2026/api/nrl/classic/v1/players-cf?embed=player_stats,positions&round={ROUND}"
 
 TEAM_COLOURS = {
